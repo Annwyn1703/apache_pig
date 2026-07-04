@@ -1,0 +1,15 @@
+Pig Latin Script
+    ↓
+Parser
+    ↓
+Logical Plan
+    ↓
+Optimizer
+    ↓
+Physical Plan
+    ↓
+Execution Engine
+    ↓
+Hadoop / HDFS
+    ↓
+Output

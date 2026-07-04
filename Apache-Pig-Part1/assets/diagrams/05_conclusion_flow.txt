@@ -1,0 +1,11 @@
+Big Data Challenge
+    ↓
+Apache Pig
+    ↓
+Pig Latin
+    ↓
+RetailRocket Analysis
+    ↓
+Business Insight
+    ↓
+Better Decisions

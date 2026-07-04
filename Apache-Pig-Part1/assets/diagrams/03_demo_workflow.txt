@@ -1,0 +1,13 @@
+events.csv
+    ↓
+LOAD
+    ↓
+DESCRIBE
+    ↓
+DUMP
+    ↓
+Analyze
+    ↓
+STORE
+    ↓
+Business Insight

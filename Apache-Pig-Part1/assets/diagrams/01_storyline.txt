@@ -1,0 +1,13 @@
+Business Problem
+    ↓
+RetailRocket Dataset
+    ↓
+Apache Pig
+    ↓
+Pig Latin
+    ↓
+Analysis Workflow
+    ↓
+Business Insight
+    ↓
+Decision Support
