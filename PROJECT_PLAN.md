@@ -3813,6 +3813,133 @@ STORE
 
 **Purpose**
 - Start the live demo with data loading
+Đây là **Slide 22**, là slide đầu tiên của phần demo thực tế. Theo mình, **đừng chỉ ghi "Load Dataset"**, mà hãy làm giống một **live walkthrough**: có **Business Goal → Pig Script → Expected Output → Explanation**. Cách này giúp người nghe vừa theo dõi slide vừa nhìn terminal.
+
+---
+
+# Slide 22 — Demo 1: Loading the Dataset
+
+## **Demo 1 – Load the RetailRocket Dataset**
+
+### Objective
+
+Load the **RetailRocket `events.csv`** file into Apache Pig and create a relation for further analysis.
+
+---
+
+## Input Dataset
+
+```text
+HDFS
+
+/pig-demo/input/events.csv
+```
+
+---
+
+## Pig Latin Script
+
+```pig
+events = LOAD '/pig-demo/input/events.csv'
+USING PigStorage(',')
+AS (
+    timestamp:long,
+    visitorid:long,
+    event:chararray,
+    itemid:long,
+    transactionid:long
+);
+```
+
+---
+
+## What Does This Command Do?
+
+| Component         | Purpose                                                           |
+| ----------------- | ----------------------------------------------------------------- |
+| `LOAD`            | Reads the dataset into Apache Pig                                 |
+| `PigStorage(',')` | Specifies that the file is comma-separated (CSV)                  |
+| `AS (...)`        | Defines the schema and data types                                 |
+| `events`          | Creates a Pig relation that will be used in subsequent operations |
+
+---
+
+## Expected Result
+
+```text
+events (Relation)
+
+Columns:
+• timestamp
+• visitorid
+• event
+• itemid
+• transactionid
+```
+
+> **No output is displayed yet.**
+> Apache Pig creates a **logical relation**, which will be used by the following commands.
+
+---
+
+## Key Takeaway
+
+> **The `LOAD` command is the entry point of every Pig program. It imports raw data and defines the structure required for subsequent analysis.**
+
+---
+
+# 🎯 Slide Objective
+
+After this step, the audience should understand:
+
+* How to load a CSV dataset into Apache Pig.
+* How to define a schema using the `AS` clause.
+* Why the `LOAD` command is the first step in every Pig Latin workflow.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Left Side – Data Loading Pipeline
+
+```text
+events.csv
+      │
+      ▼
+ LOAD
+      │
+      ▼
+Pig Relation
+(events)
+```
+
+### Right Side – Terminal Screenshot
+
+Hiển thị:
+
+```bash
+grunt> events = LOAD ...
+```
+
+Hoặc screenshot thực tế từ terminal để người nghe đối chiếu với phần demo.
+
+---
+
+# 🎤 Speaker Notes (~1 phút)
+
+> The first step in our demonstration is to load the `events.csv` dataset into Apache Pig.
+>
+> We use the `LOAD` command together with `PigStorage(',')` because the input file is in CSV format.
+>
+> The `AS` clause defines the schema and data types for each column, allowing Pig to interpret the dataset correctly.
+>
+> At this stage, Apache Pig creates a relation named `events`. No data is displayed yet because Pig uses **lazy evaluation**. The actual execution will occur only when a command such as `DUMP` or `STORE` is invoked.
+
+---
+
+## 🔗 Transition to Slide 23
+
+> **The dataset has now been loaded successfully. Before performing any analysis, we should verify that the schema is correct and inspect a few sample records using the `DESCRIBE` and `DUMP` commands.**
 
 ---
 
@@ -3828,6 +3955,162 @@ STORE
 
 **Purpose**
 - Show total scale of the dataset
+Đây là **Demo 2**, nhưng mình đề xuất **đổi tên thành "Business Question 1"** thay vì "Demo 2". Điều này giúp bài trình bày mang tính **business-driven** hơn, đúng tinh thần phân tích dữ liệu.
+
+> Thay vì:
+>
+> ❌ Demo 2 – Count Total Events
+>
+> Nên dùng:
+>
+> ✅ **Business Question 1 – How Many Customer Events Are Recorded?**
+
+---
+
+# Slide 23 — Business Question 1: Count Total Events
+
+## **Business Question 1**
+
+### **How many customer events are recorded in the RetailRocket dataset?**
+
+Before performing detailed analysis, we first need to understand the overall size of the dataset.
+
+---
+
+## Pig Latin Script
+
+```pig
+-- Group all records into a single group
+grp = GROUP events ALL;
+
+-- Count the total number of records
+result = FOREACH grp GENERATE COUNT(events);
+
+DUMP result;
+```
+
+---
+
+## Processing Workflow
+
+```text
+events
+   │
+   ▼
+GROUP ALL
+   │
+   ▼
+COUNT(events)
+   │
+   ▼
+Total Number of Events
+```
+
+---
+
+## How It Works
+
+| Command         | Purpose                                      |
+| --------------- | -------------------------------------------- |
+| `GROUP ALL`     | Groups all records into a single collection. |
+| `COUNT(events)` | Counts every record within that group.       |
+| `DUMP`          | Displays the result on the screen.           |
+
+---
+
+## Expected Output
+
+```text
+(2756101)
+```
+
+> **Approximately 2.7 million customer events** are recorded in the RetailRocket dataset.
+
+*(Nếu bạn dùng `events_sample.csv` thì thay bằng số lượng thực tế của sample, ví dụ `(100000)`.)*
+
+---
+
+## Business Insight
+
+The result tells us:
+
+* The dataset contains **millions of customer interactions**.
+* This confirms that RetailRocket is a **large-scale event log**, making it suitable for demonstrating Big Data processing with Apache Pig.
+* Processing such volumes manually or with traditional tools would be inefficient.
+
+---
+
+## Key Takeaway
+
+> **`GROUP ALL` + `COUNT` is a simple but essential operation for understanding the scale of a dataset before performing more detailed analysis.**
+
+---
+
+# 🎯 Slide Objective
+
+After this demo, the audience should understand:
+
+* How to count the total number of records in Apache Pig.
+* The purpose of `GROUP ALL` and `COUNT`.
+* Why measuring dataset size is an important first step in data analysis.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Left Side – Pig Workflow
+
+```text
+events
+   │
+   ▼
+GROUP ALL
+   │
+   ▼
+COUNT
+   │
+   ▼
+2.7 Million Events
+```
+
+### Right Side – Business Meaning
+
+```text
+📊 Dataset Scale
+
+≈ 2.7 Million Events
+
+↓
+
+Big Data
+
+↓
+
+Suitable for Hadoop
+```
+
+---
+
+## 🎤 Speaker Notes (~1.5 phút)
+
+> Our first business question is straightforward: **How many customer events are stored in the dataset?**
+>
+> To answer this, we use two Pig operations:
+>
+> * `GROUP ALL`, which places all records into a single group.
+> * `COUNT`, which counts the number of records in that group.
+>
+> Finally, `DUMP` displays the result.
+>
+> The output shows that the RetailRocket dataset contains approximately **2.7 million customer events**. This highlights why Apache Pig and Hadoop are valuable tools, as they are designed to process datasets of this scale efficiently.
+>
+> Understanding the dataset size also provides context for the analyses that follow.
+
+---
+
+## 🔗 Transition to Slide 24
+
+> **Now that we know the overall size of the dataset, the next step is to understand its composition by analyzing the distribution of customer event types: views, add-to-cart actions, and completed transactions.**
 
 ---
 
@@ -3843,6 +4126,164 @@ STORE
 
 **Purpose**
 - Measure distribution of views, carts, and purchases
+Đây là **Business Question 2**, và theo mình đây là **slide quan trọng nhất của phần demo**, vì kết quả không chỉ là số liệu mà còn thể hiện **customer behavior**.
+
+Mình khuyên **không nên chỉ hiển thị terminal output**. Sau khi chạy Pig, nên hiển thị **một biểu đồ cột hoặc pie chart** để người nghe dễ hình dung. (Bạn có thể dùng Excel hoặc PowerPoint tạo biểu đồ từ kết quả Pig.)
+
+---
+
+# Slide 24 — Business Question 2: Event Distribution Analysis
+
+## **Business Question 2**
+
+### **What is the distribution of customer event types?**
+
+Understanding how customers interact with the platform helps us identify user behavior patterns and the overall conversion process.
+
+---
+
+## Pig Latin Script
+
+```pig
+-- Group records by event type
+grp = GROUP events BY event;
+
+-- Count the number of records in each group
+result = FOREACH grp GENERATE
+    group AS event_type,
+    COUNT(events) AS total_events;
+
+-- Sort results
+result = ORDER result BY total_events DESC;
+
+DUMP result;
+```
+
+---
+
+## Processing Workflow
+
+```text
+events
+    │
+    ▼
+GROUP BY event
+    │
+    ▼
+COUNT
+    │
+    ▼
+ORDER
+    │
+    ▼
+Event Distribution
+```
+
+---
+
+## Expected Output
+
+| Event Type      | Total Events |
+| --------------- | -----------: |
+| **view**        |    2,664,312 |
+| **addtocart**   |       69,332 |
+| **transaction** |       22,457 |
+
+> *(Use the actual numbers from your execution. The values above are illustrative.)*
+
+---
+
+## Business Interpretation
+
+* 👀 **View** is the most common activity, showing customer interest in products.
+* 🛒 **Add-to-Cart** indicates purchase intention but does not guarantee a sale.
+* 💳 **Transaction** represents completed purchases and contributes directly to revenue.
+
+This reflects a typical **customer conversion funnel**, where only a portion of users progress to the final purchase stage.
+
+---
+
+## Business Value
+
+This analysis helps businesses:
+
+* Measure customer engagement.
+* Evaluate purchase conversion.
+* Identify opportunities to improve the shopping experience.
+* Support marketing and sales optimization.
+
+---
+
+## Key Takeaway
+
+> **Grouping and counting event types allows us to transform raw event logs into meaningful customer behavior analytics.**
+
+---
+
+# 🎯 Slide Objective
+
+After this demo, the audience should understand:
+
+* How to group data using `GROUP BY`.
+* How to calculate category statistics using `COUNT`.
+* How Apache Pig can summarize millions of records into meaningful business metrics.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Left Side – Pig Workflow
+
+```text
+events
+    │
+    ▼
+GROUP BY event
+    │
+    ▼
+COUNT
+    │
+    ▼
+ORDER
+    │
+    ▼
+Event Statistics
+```
+
+### Right Side – Customer Funnel
+
+```text
+👀 View
+██████████████████████████
+
+🛒 Add to Cart
+██████
+
+💳 Transaction
+██
+```
+
+*(Conceptual illustration; replace with a bar chart generated from your actual demo results if possible.)*
+
+---
+
+## 🎤 Speaker Notes (~2 phút)
+
+> Our second business question is to understand the distribution of customer activities.
+>
+> We first group the dataset by the **event** field, then count the number of records in each group. Finally, we sort the results in descending order.
+>
+> The analysis shows that **view** events occur most frequently, followed by **add-to-cart**, while **transaction** events represent only a small proportion of all customer interactions.
+>
+> This pattern reflects a typical customer conversion funnel. Many users browse products, fewer express purchase intent by adding items to the cart, and an even smaller number complete a purchase.
+>
+> This type of analysis is commonly used by e-commerce companies to evaluate user engagement and identify opportunities to improve conversion rates.
+
+---
+
+## 🔗 Transition to Slide 25
+
+> **After understanding overall customer behavior, our next objective is to identify which products attract the most attention. We will use Apache Pig to find the Top 10 most viewed products.**
 
 ---
 
@@ -3860,6 +4301,198 @@ STORE
 
 **Purpose**
 - Identify popular products
+Đây là **Business Question 3**, và theo mình đây là **demo "đắt giá" nhất** vì nó thể hiện đúng giá trị của Big Data Analytics.
+
+Thay vì chỉ nói "Top Viewed Products", hãy dẫn dắt như một **business request** từ Product Manager hoặc Marketing.
+
+---
+
+# Slide 25 — Business Question 3: Top Viewed Products
+
+## **Business Question 3**
+
+### **Which products receive the highest number of customer views?**
+
+Identifying the most viewed products helps businesses understand **customer interests**, optimize product recommendations, and support marketing decisions.
+
+---
+
+## Pig Latin Script
+
+```pig id="kk7n9o"
+-- Keep only product view events
+views = FILTER events BY event == 'view';
+
+-- Group by product ID
+grp = GROUP views BY itemid;
+
+-- Count the number of views
+result = FOREACH grp
+GENERATE
+    group AS itemid,
+    COUNT(views) AS total_views;
+
+-- Sort by view count (descending)
+result = ORDER result BY total_views DESC;
+
+-- Return the Top 10 products
+top10 = LIMIT result 10;
+
+DUMP top10;
+```
+
+---
+
+## Processing Workflow
+
+```text id="dh9l1p"
+events.csv
+      │
+      ▼
+FILTER (view)
+      │
+      ▼
+GROUP BY itemid
+      │
+      ▼
+COUNT
+      │
+      ▼
+ORDER DESC
+      │
+      ▼
+LIMIT 10
+      │
+      ▼
+Top 10 Viewed Products
+```
+
+---
+
+## Expected Output
+
+| Rank | Product ID | Total Views |
+| ---: | ---------: | ----------: |
+|    1 |     461686 |       1,245 |
+|    2 |     312728 |       1,187 |
+|    3 |       7943 |       1,142 |
+|  ... |        ... |         ... |
+|   10 |      98654 |         892 |
+
+> **Note:** Replace these values with the actual results from your Pig execution.
+
+---
+
+## Business Insight
+
+The results help answer important business questions:
+
+* Which products attract the highest customer attention?
+* Which products should be promoted on the homepage?
+* Which items are suitable for recommendation systems?
+* Which products require inventory planning due to high demand?
+
+---
+
+## Business Value
+
+Using Apache Pig, businesses can quickly identify **high-interest products** from millions of customer interactions without writing complex MapReduce programs.
+
+These insights support:
+
+* Product recommendation systems
+* Marketing campaigns
+* Sales forecasting
+* Inventory optimization
+
+---
+
+## Key Takeaway
+
+> **By combining `FILTER`, `GROUP`, `COUNT`, `ORDER`, and `LIMIT`, Apache Pig can efficiently identify the most popular products from millions of customer events.**
+
+---
+
+# 🎯 Slide Objective
+
+After this demo, the audience should understand:
+
+* How multiple Pig Latin commands are combined to answer a real business question.
+* How to calculate product popularity from user behavior data.
+* Why this analysis is valuable in e-commerce.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Left Side – Pig Workflow
+
+```text id="a1g6vk"
+events.csv
+      │
+      ▼
+FILTER view
+      │
+      ▼
+GROUP itemid
+      │
+      ▼
+COUNT
+      │
+      ▼
+ORDER DESC
+      │
+      ▼
+LIMIT 10
+```
+
+### Right Side – Top Products
+
+Nếu có kết quả thật từ demo, hãy hiển thị **bar chart** trong PowerPoint với:
+
+* **X-axis:** Product ID
+* **Y-axis:** Number of Views
+
+Điều này trực quan hơn nhiều so với chỉ hiển thị bảng.
+
+---
+
+### Bottom Highlight
+
+```text id="5lmr6r"
+Customer Views
+       │
+       ▼
+Apache Pig
+       │
+       ▼
+Top Products
+       │
+       ▼
+Recommendation & Marketing
+```
+
+---
+
+## 🎤 Speaker Notes (~2 phút)
+
+> Our third business question focuses on product popularity.
+>
+> First, we filter the dataset to keep only **view** events, because we want to measure customer interest rather than purchases.
+>
+> Next, we group the data by **item ID** and count how many times each product was viewed.
+>
+> The results are then sorted in descending order, and we return the **Top 10 most viewed products**.
+>
+> From a business perspective, this information is valuable for recommendation systems, homepage personalization, promotional campaigns, and inventory planning.
+>
+> This example demonstrates how Apache Pig can transform millions of raw event records into actionable business insights with just a few Pig Latin commands.
+
+---
+
+## 🔗 Transition to Slide 26
+
+> **Product popularity is only one aspect of customer behavior. Next, we will analyze user activity to identify the most active customers in the RetailRocket dataset.**
 
 ---
 
@@ -3877,6 +4510,187 @@ STORE
 
 **Purpose**
 - Identify active users
+Đây là **Business Question 4**, là câu hỏi cuối cùng trong phần phân tích dữ liệu. Mục tiêu không chỉ là đếm số lần xuất hiện của `visitorid`, mà còn liên hệ với **Customer Analytics** và **CRM (Customer Relationship Management)**.
+
+---
+
+# Slide 26 — Business Question 4: Top Active Visitors
+
+## **Business Question 4**
+
+### **Which customers are the most active on the platform?**
+
+By analyzing customer activity, businesses can identify highly engaged users and better understand customer behavior.
+
+---
+
+## Pig Latin Script
+
+```pig
+-- Group records by visitor ID
+grp = GROUP events BY visitorid;
+
+-- Count the number of activities for each visitor
+result = FOREACH grp
+GENERATE
+    group AS visitorid,
+    COUNT(events) AS total_activities;
+
+-- Sort by activity count
+result = ORDER result BY total_activities DESC;
+
+-- Return the Top 10 active visitors
+top10 = LIMIT result 10;
+
+DUMP top10;
+```
+
+---
+
+## Processing Workflow
+
+```text
+events.csv
+      │
+      ▼
+GROUP BY visitorid
+      │
+      ▼
+COUNT
+      │
+      ▼
+ORDER DESC
+      │
+      ▼
+LIMIT 10
+      │
+      ▼
+Top Active Visitors
+```
+
+---
+
+## Expected Output
+
+| Rank | Visitor ID | Total Activities |
+| ---: | ---------: | ---------------: |
+|    1 |    1150086 |              775 |
+|    2 |     530559 |              721 |
+|    3 |     152963 |              698 |
+|  ... |        ... |              ... |
+|   10 |     845312 |              612 |
+
+> **Note:** Replace these values with the actual output from your Pig execution.
+
+---
+
+## Business Interpretation
+
+The most active visitors typically:
+
+* Browse products frequently.
+* Return to the platform multiple times.
+* Show strong engagement with the shopping platform.
+
+However, **high activity does not necessarily mean high purchase value**. A visitor may view many products without completing a transaction.
+
+---
+
+## Business Value
+
+Identifying active users helps businesses:
+
+* Recognize loyal or highly engaged customers.
+* Target users for personalized promotions.
+* Improve customer retention strategies.
+* Support customer segmentation and CRM initiatives.
+
+---
+
+## Key Takeaway
+
+> **Apache Pig can efficiently identify highly active users by grouping millions of event records and calculating customer activity statistics with only a few Pig Latin commands.**
+
+---
+
+# 🎯 Slide Objective
+
+After this demo, the audience should understand:
+
+* How to analyze customer activity using Apache Pig.
+* How `GROUP`, `COUNT`, `ORDER`, and `LIMIT` work together.
+* How activity statistics can support customer engagement analysis and business decision-making.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Left Side – Processing Workflow
+
+```text
+events.csv
+      │
+      ▼
+GROUP visitorid
+      │
+      ▼
+COUNT
+      │
+      ▼
+ORDER DESC
+      │
+      ▼
+LIMIT 10
+```
+
+---
+
+### Right Side – Top Active Visitors
+
+Hiển thị một bảng hoặc biểu đồ cột:
+
+| Visitor | Activities |
+| ------- | ---------: |
+| 1150086 |        775 |
+| 530559  |        721 |
+| 152963  |        698 |
+
+*(Sử dụng dữ liệu thực tế từ kết quả demo.)*
+
+---
+
+### Bottom Highlight
+
+```text
+Customer Events
+        │
+        ▼
+Apache Pig
+        │
+        ▼
+Top Active Visitors
+        │
+        ▼
+Customer Engagement
+```
+
+---
+
+## 🎤 Speaker Notes (~2 phút)
+
+> Our final business question focuses on customer activity.
+>
+> We group the dataset by **visitor ID** and count the total number of events generated by each customer. After sorting the results in descending order, we select the top ten most active visitors.
+>
+> This analysis helps businesses identify highly engaged users who frequently interact with the platform. These customers may be good candidates for loyalty programs, personalized recommendations, or targeted marketing campaigns.
+>
+> It is important to note that a high number of activities does not always indicate high purchasing value. Therefore, in a real-world scenario, this analysis would often be combined with transaction data to gain a more complete understanding of customer behavior.
+
+---
+
+## 🔗 Transition to Slide 27
+
+> **We have successfully answered our business questions using Apache Pig. The final step in the workflow is to save the processed results so they can be reused for reporting, visualization, or downstream analytics.**
 
 ---
 
@@ -3888,6 +4702,202 @@ STORE
 
 **Purpose**
 - Save the output and complete the pipeline
+Đây là **slide kết thúc phần demo**, nên mục tiêu không chỉ là chạy lệnh `STORE`, mà còn **hoàn thành toàn bộ ETL/Data Analytics Pipeline**.
+
+Theo mình, đây là lúc nhấn mạnh:
+
+> **Apache Pig không chỉ phân tích dữ liệu mà còn tạo đầu ra để phục vụ các hệ thống BI, Dashboard hoặc Machine Learning.**
+
+---
+
+# Slide 27 — Demo 6: Store Analysis Results
+
+## **Final Step – Store the Analysis Results**
+
+After completing the analysis, Apache Pig allows us to **store the processed results** for reporting, visualization, or further analytics.
+
+This completes the end-to-end Big Data processing pipeline.
+
+---
+
+## Pig Latin Script
+
+```pig
+-- Save the Top 10 Viewed Products
+STORE top10
+INTO '/pig-demo/output/top_products'
+USING PigStorage(',');
+
+-- Save the Event Distribution
+STORE result
+INTO '/pig-demo/output/event_distribution'
+USING PigStorage(',');
+```
+
+---
+
+## Processing Workflow
+
+```text
+RetailRocket Dataset
+        │
+        ▼
+Apache Pig Analysis
+        │
+        ▼
+Analysis Result
+        │
+        ▼
+STORE
+        │
+        ▼
+HDFS Output
+```
+
+---
+
+## Output Directory
+
+```text
+/pig-demo/output/
+
+├── event_distribution/
+│     part-r-00000
+│
+├── top_products/
+│     part-r-00000
+│
+└── top_visitors/
+      part-r-00000
+```
+
+---
+
+## Why Store the Results?
+
+The stored output can be used for:
+
+* 📊 Business Intelligence (BI) dashboards
+* 📈 Data visualization
+* 📑 Business reports
+* 🤖 Machine Learning pipelines
+* 🔄 Downstream ETL workflows
+
+---
+
+## End-to-End Pipeline Completed
+
+```text
+RetailRocket Dataset
+        │
+        ▼
+LOAD
+        │
+        ▼
+FILTER
+        │
+        ▼
+GROUP
+        │
+        ▼
+COUNT
+        │
+        ▼
+ORDER
+        │
+        ▼
+LIMIT
+        │
+        ▼
+STORE
+        │
+        ▼
+Business Insights
+```
+
+---
+
+## Key Takeaway
+
+> **The `STORE` command is the final step in Apache Pig. It persists the analysis results so they can be reused by other systems, making Pig an effective tool for ETL and Big Data analytics pipelines.**
+
+---
+
+# 🎯 Slide Objective
+
+After this demo, the audience should understand:
+
+* How to save analysis results using the `STORE` command.
+* Where Pig stores the output.
+* Why persisting processed data is an important step in a Big Data workflow.
+* That the complete Apache Pig pipeline has now been executed successfully.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Left Side – Final Pipeline
+
+```text
+events.csv
+     │
+     ▼
+LOAD
+     │
+     ▼
+Analysis
+     │
+     ▼
+STORE
+     │
+     ▼
+HDFS Output
+```
+
+### Right Side – Data Consumption
+
+```text
+HDFS Output
+      │
+      ├── 📊 Dashboard
+      ├── 📑 Reports
+      ├── 📈 Visualization
+      └── 🤖 Machine Learning
+```
+
+---
+
+## 🎤 Speaker Notes (~1.5 phút)
+
+> The final step of our workflow is to save the processed results.
+>
+> Using the `STORE` command, Apache Pig writes the output back to HDFS. Instead of remaining in memory, the analysis results become persistent files that can be accessed by other applications.
+>
+> In practice, these outputs are often consumed by Business Intelligence dashboards, reporting systems, data warehouses, or machine learning pipelines.
+>
+> At this point, we have completed the entire Apache Pig workflow—from loading raw data, transforming and analyzing it, to storing the final results. This demonstrates how Apache Pig supports a complete Big Data analytics pipeline.
+
+---
+
+## 🔗 Transition to Chapter 6 – Business Insights
+
+> **With the demo complete, let's summarize what these analyses tell us and discuss how Apache Pig transforms raw customer event data into valuable business insights.**
+
+### 💡 Gợi ý nhỏ
+
+Nếu có thời gian, sau khi chạy `STORE`, hãy mở thư mục output và chạy:
+
+```bash
+hdfs dfs -ls /pig-demo/output/
+```
+
+và:
+
+```bash
+hdfs dfs -cat /pig-demo/output/top_products/part-r-00000
+```
+
+Điều này giúp chứng minh rằng kết quả đã thực sự được ghi xuống HDFS, thay vì chỉ hiển thị trên màn hình terminal. Đây là một điểm cộng trong phần demo vì thể hiện đầy đủ vòng đời xử lý dữ liệu của Apache Pig.
 
 ---
 
@@ -3913,6 +4923,193 @@ Conversion Rate
 
 **Purpose**
 - Translate technical output into business value
+Đây là **slide quan trọng nhất sau phần demo**.
+
+Rất nhiều nhóm kết thúc ngay sau khi chạy lệnh Pig, nhưng thực tế **Big Data không dừng ở việc xử lý dữ liệu**. Giá trị nằm ở việc **chuyển kết quả phân tích thành quyết định kinh doanh**.
+
+Đây là slide giúp bạn kết nối **Computer Science → Business**.
+
+---
+
+# Slide 28 — From Data Analytics to Business Insights
+
+## **Transforming Data into Business Value**
+
+Apache Pig does more than process data. It enables organizations to convert **raw customer events** into **actionable business insights** that support decision-making.
+
+---
+
+## Business Insights from Our Analysis
+
+| Analysis Result         | Business Insight                                          | Business Action                                               |
+| ----------------------- | --------------------------------------------------------- | ------------------------------------------------------------- |
+| **Top Viewed Products** | Identify products with the highest customer interest.     | Improve product recommendations and homepage promotions.      |
+| **Top Active Visitors** | Recognize highly engaged customers.                       | Launch loyalty programs and personalized marketing campaigns. |
+| **Event Distribution**  | Understand customer behavior across the shopping journey. | Improve conversion rates and optimize the sales funnel.       |
+| **Transaction Records** | Measure completed purchases and sales performance.        | Evaluate business performance and forecast demand.            |
+
+---
+
+## From Raw Data to Business Decisions
+
+```text id="h4jzde"
+Customer Events
+(events.csv)
+        │
+        ▼
+Apache Pig
+(Data Processing)
+        │
+        ▼
+Analytics Results
+        │
+        ▼
+Business Insights
+        │
+        ▼
+Business Decisions
+```
+
+---
+
+## Examples in an E-commerce Business
+
+### 📦 Top Products
+
+↓
+
+Feature products on the homepage
+
+↓
+
+Improve recommendation systems
+
+↓
+
+Increase product visibility
+
+---
+
+### 👤 Top Active Customers
+
+↓
+
+Personalized promotions
+
+↓
+
+Customer loyalty programs
+
+↓
+
+Retention campaigns
+
+---
+
+### 💳 Transaction Analysis
+
+↓
+
+Monitor sales performance
+
+↓
+
+Analyze conversion rates
+
+↓
+
+Optimize the purchasing journey
+
+---
+
+## Key Message
+
+> **Big Data analytics is valuable not because it processes millions of records, but because it enables organizations to make better, data-driven decisions.**
+
+---
+
+# 🎯 Slide Objective
+
+After this slide, the audience should understand:
+
+* Apache Pig transforms technical outputs into meaningful business insights.
+* Data analytics supports strategic and operational decision-making.
+* The value of Big Data lies in enabling evidence-based business decisions.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Center Diagram
+
+```text id="mrq74j"
+Raw Data
+     │
+     ▼
+Apache Pig
+     │
+     ▼
+Information
+     │
+     ▼
+Business Insight
+     │
+     ▼
+Business Decision
+```
+
+---
+
+### Right Side – Three Business Scenarios
+
+```text id="9d9klb"
+🔥 Top Products
+      │
+      ▼
+Recommendation
+
+👤 Active Customers
+      │
+      ▼
+Promotion
+
+💳 Transactions
+      │
+      ▼
+Conversion Analysis
+```
+
+---
+
+### Bottom Highlight
+
+```text id="crl4m9"
+Data
+   →
+Information
+   →
+Knowledge
+   →
+Business Value
+```
+
+---
+
+# 🎤 Speaker Notes (~2 phút)
+
+> Throughout the demonstration, we used Apache Pig to process millions of customer events and answer several business questions.
+>
+> However, the true value of Big Data analytics is not the commands themselves—it is the business insights that can be derived from the results.
+>
+> For example, identifying the most viewed products helps improve recommendation systems and marketing strategies. Finding the most active customers supports customer segmentation and loyalty programs. Analyzing transaction data allows businesses to monitor sales performance and identify opportunities to improve conversion rates.
+>
+> In other words, Apache Pig serves as a bridge between raw data and business decision-making, enabling organizations to make informed, data-driven decisions.
+
+---
+
+## 🔗 Transition to Slide 29
+
+> **While Apache Pig provides an efficient and simple approach to batch data processing, it is important to understand both its strengths and its limitations. In the next slide, we will briefly evaluate Apache Pig and compare where it is most suitable in modern Big Data ecosystems.**
 
 ---
 
@@ -3933,6 +5130,162 @@ Conversion Rate
 
 **Purpose**
 - Evaluate Pig honestly
+Đây là **slide đánh giá (Evaluation)**, rất quan trọng vì nó thể hiện bạn **không chỉ giới thiệu công cụ mà còn biết đánh giá khách quan**.
+
+Mình khuyên **không nên ghi "Less popular than Spark"** vì dễ bị phản biện. Thay vào đó nên dùng:
+
+> **Apache Spark has become the preferred choice for many modern Big Data workloads, especially real-time analytics and machine learning.**
+
+Đây là cách diễn đạt mang tính học thuật và chính xác hơn.
+
+---
+
+# Slide 29 — Advantages and Limitations of Apache Pig
+
+## **Evaluating Apache Pig**
+
+Apache Pig is a powerful tool for **batch-oriented Big Data processing**, but like any technology, it has both strengths and limitations.
+
+Choosing the right tool depends on the specific use case and business requirements.
+
+---
+
+## Advantages
+
+| Advantage                    | Description                                                          |
+| ---------------------------- | -------------------------------------------------------------------- |
+| ✅ **Easy to Learn**          | Pig Latin is much simpler than Java MapReduce.                       |
+| ✅ **Fewer Lines of Code**    | Complex data processing tasks can be expressed with concise scripts. |
+| ✅ **Automatic Optimization** | Pig optimizes execution plans before generating MapReduce jobs.      |
+| ✅ **Excellent for ETL**      | Well suited for data cleaning, transformation, and batch processing. |
+| ✅ **Scalable**               | Runs on Hadoop and can process very large datasets stored in HDFS.   |
+
+---
+
+## Limitations
+
+| Limitation                        | Description                                                                                         |
+| --------------------------------- | --------------------------------------------------------------------------------------------------- |
+| ⚠️ **Batch Processing Only**      | Designed for offline analytics rather than real-time data processing.                               |
+| ⚠️ **No Native Machine Learning** | Requires integration with other frameworks for ML tasks.                                            |
+| ⚠️ **Hadoop Dependency**          | Pig is tightly coupled with the Hadoop ecosystem.                                                   |
+| ⚠️ **Reduced Adoption**           | Modern Big Data platforms often prefer Apache Spark for advanced analytics and real-time workloads. |
+
+---
+
+## Comparison
+
+| Apache Pig                   | Apache Spark                                |
+| ---------------------------- | ------------------------------------------- |
+| Batch Processing             | Batch + Real-Time Processing                |
+| Pig Latin                    | Scala, Python, Java, SQL                    |
+| ETL & Data Preparation       | ETL, Analytics, Machine Learning, Streaming |
+| Hadoop MapReduce Engine      | In-Memory Computing Engine                  |
+| Easy for Data Transformation | Broader ecosystem and higher performance    |
+
+---
+
+## When Should We Use Apache Pig?
+
+**Recommended for:**
+
+* ETL pipelines
+* Log processing
+* Data cleaning
+* Batch analytics
+* Hadoop-based environments
+
+**Not ideal for:**
+
+* Real-time analytics
+* Streaming applications
+* Machine learning workflows
+* Interactive analytics
+
+---
+
+## Key Takeaway
+
+> **Apache Pig remains an effective solution for ETL and batch-oriented Big Data processing, while newer frameworks such as Apache Spark are often preferred for real-time analytics and machine learning.**
+
+---
+
+# 🎯 Slide Objective
+
+After this slide, the audience should understand:
+
+* The main strengths of Apache Pig.
+* Its practical limitations.
+* Where Apache Pig fits within today's Big Data ecosystem.
+* When it is appropriate to choose Pig over other technologies.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Left Side – Strengths
+
+```text
+🐷 Apache Pig
+
+✓ High-Level Language
+
+✓ Easy to Learn
+
+✓ ETL
+
+✓ Batch Processing
+
+✓ Hadoop Integration
+```
+
+---
+
+### Right Side – Limitations
+
+```text
+⚠ Batch Only
+
+⚠ No Native ML
+
+⚠ Hadoop Dependent
+
+⚠ Spark Preferred for
+   Modern Analytics
+```
+
+---
+
+### Bottom Comparison
+
+```text
+Apache Pig
+      │
+ ETL & Batch Analytics
+      │
+      ▼
+Apache Spark
+      │
+Real-Time + ML + Streaming
+```
+
+---
+
+# 🎤 Speaker Notes (~2 phút)
+
+> Like any technology, Apache Pig has both advantages and limitations.
+>
+> Its biggest strengths are simplicity, productivity, and scalability. By using Pig Latin, developers can implement complex ETL and batch processing tasks with far fewer lines of code than Java MapReduce. Apache Pig also automatically optimizes execution plans and integrates seamlessly with Hadoop.
+>
+> However, Apache Pig is primarily designed for **batch processing**. It does not provide native support for real-time analytics, streaming, or machine learning. In modern Big Data architectures, frameworks such as Apache Spark are often selected for these advanced workloads because they provide in-memory processing and a broader ecosystem.
+>
+> Therefore, Apache Pig is still an excellent choice for Hadoop-based ETL pipelines and offline analytics, but it should be selected according to the project's requirements rather than treated as a universal solution.
+
+---
+
+## 🔗 Transition to Slide 30
+
+> **To conclude our presentation, let's summarize the key concepts we have learned about Apache Pig and the main insights gained from our RetailRocket case study.**
 
 ---
 
@@ -3956,6 +5309,173 @@ Business Insight
 
 **Purpose**
 - Summarize the full story
+Đây là **slide kết luận**, và theo mình **không nên chỉ lặp lại các mục đã trình bày**. Một kết luận tốt cần trả lời được:
+
+> **"Sau 30 phút, người nghe nên nhớ điều gì?"**
+
+Mình đề xuất kết luận theo mô hình:
+
+> **Problem → Solution → Case Study → Outcome → Takeaway**
+
+Đây là cách các buổi technical seminar thường kết thúc.
+
+---
+
+# Slide 30 — Conclusion
+
+## **Conclusion**
+
+Throughout this presentation, we explored how **Apache Pig** simplifies Big Data processing by providing a high-level scripting language for Hadoop.
+
+Using the **RetailRocket E-commerce Dataset**, we demonstrated how Pig Latin can transform millions of customer event records into meaningful business insights through a simple and structured data processing workflow.
+
+---
+
+## What We Learned
+
+### 1. The Problem
+
+Modern e-commerce platforms generate **millions of customer events**, making traditional data processing approaches inefficient.
+
+---
+
+### 2. The Solution
+
+Apache Pig simplifies Big Data analytics by:
+
+* Using **Pig Latin** instead of Java MapReduce.
+* Automatically generating optimized Hadoop jobs.
+* Reducing development complexity.
+
+---
+
+### 3. The Case Study
+
+Using the **RetailRocket Dataset**, we successfully:
+
+* Loaded and explored the dataset.
+* Analyzed customer behavior.
+* Identified the most viewed products.
+* Found the most active visitors.
+* Stored the analysis results.
+
+---
+
+### 4. The Business Value
+
+The analysis supports:
+
+* Product recommendation
+* Customer segmentation
+* Marketing campaigns
+* Business reporting
+* Data-driven decision making
+
+---
+
+## End-to-End Story
+
+```text id="3q4uij"
+Business Problem
+        │
+        ▼
+RetailRocket Dataset
+        │
+        ▼
+Apache Pig
+(Pig Latin)
+        │
+        ▼
+Big Data Processing
+        │
+        ▼
+Business Analytics
+        │
+        ▼
+Business Insights
+        │
+        ▼
+Better Decisions
+```
+
+---
+
+## Final Takeaway
+
+> **Apache Pig enables developers to focus on business logic rather than low-level distributed programming, making Big Data analytics more accessible, efficient, and scalable.**
+
+---
+
+# 🎯 Slide Objective
+
+After this slide, the audience should remember:
+
+* Why Apache Pig was developed.
+* How Pig Latin simplifies Hadoop programming.
+* How a real-world dataset can be analyzed using Apache Pig.
+* The connection between Big Data processing and business decision-making.
+
+---
+
+# 💡 Visual Design Suggestion
+
+### Center Timeline
+
+```text id="ncz4sh"
+Big Data Challenge
+        │
+        ▼
+Apache Pig
+        │
+        ▼
+Pig Latin
+        │
+        ▼
+RetailRocket Dataset
+        │
+        ▼
+Business Analytics
+        │
+        ▼
+Business Insights
+```
+
+---
+
+### Bottom Highlight
+
+```text id="4mhnjp"
+Raw Data
+      │
+      ▼
+Processing
+      │
+      ▼
+Information
+      │
+      ▼
+Business Value
+```
+
+---
+
+## 🎤 Speaker Notes (~2 phút)
+
+> To conclude, today's presentation demonstrated how Apache Pig simplifies Big Data analytics within the Hadoop ecosystem.
+>
+> We began by understanding the challenges of processing large-scale customer event data. We then introduced Apache Pig and Pig Latin as a high-level approach to building data processing pipelines without writing complex Java MapReduce programs.
+>
+> Using the RetailRocket e-commerce dataset, we walked through a complete workflow—from loading the data and analyzing customer behavior to generating business insights and storing the results.
+>
+> The key message is that the true value of Big Data is not simply processing large volumes of information, but transforming raw data into actionable insights that support better business decisions.
+>
+> Apache Pig provides a practical and efficient way to achieve this in batch-oriented Big Data environments.
+
+---
+
+## 🔗 Transition to Slide 31
+
+> **Thank you for your attention. We are now happy to answer any questions you may have.**
 
 ---
 
